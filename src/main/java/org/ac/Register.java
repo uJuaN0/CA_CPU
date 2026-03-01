@@ -41,38 +41,39 @@ public class Register {
      * Returns the value of the bit at position index.
      */
     public boolean getBit(int index) {
-        boolean value = false;
-        value = bits[index];
-        return value;
+        return bits[index];
     }
 
     /**
      * Stores an integer using an N-bit two’s complement representation.
      */
     public void set(int value) {
+        // In case value>=0 it will only convert to binary
         if (value>=0){
             for (int i=0;i<bits.length;i++){
-                bits[i] = (value % 2 != 0);
+                setBit(i,value % 2 != 0);
                 value /= 2;
             }
+        // In case value<0 it will make the conversion and the 2's complement
         } else {
             value = Math.abs(value);
             for (int i=0;i<bits.length;i++) {
-                bits[i] = (value % 2 != 0);
+                setBit(i,value % 2 != 0);
                 value /= 2;
             }
+            // 1's complement first
             for (int i=0;i<bits.length;i++) {
-                bits[i] = !bits[i];
+                setBit(i,!getBit(i));
             }
             int pos = 0;
             boolean carry = true;
-
+            // 2's complement
             while (pos < bits.length && carry) {
-                if (bits[pos]) {
-                    bits[pos] = false;
+                if (getBit(pos)) {
+                    setBit(pos,false);
                     pos++;
                 } else {
-                    bits[pos] = true;
+                    setBit(pos,true);
                     carry = false;
                 }
             }
@@ -86,7 +87,7 @@ public class Register {
         int result = 0;
         for (int i=0;i<bits.length;i++){
             if (getBit(i)){
-                result += 1<<i;
+                result += (int) Math.pow(2,i);
             }
         }
         return result;
@@ -97,12 +98,7 @@ public class Register {
      *  Interprets the register contents as a signed integer in two’s complement.
      */
     public int getInt() {
-        int result = 0;
-        for (int i = 0;i<bits.length;i++){
-            if (getBit(i)){
-                result += Math.pow(2,i);
-            }
-        }
+        int result = getUnsignedInt();
         if (getBit(bits.length-1)){
             result -= 256;
         }
@@ -114,17 +110,19 @@ public class Register {
      */
     @Override
     public String toString() {
-        StringBuilder result = new StringBuilder();
-        for (int i= bits.length-1;i>=0;i--){
+        String result = "";
+        // Runs the bits array from the MSB
+        for (int i = bits.length-1;i>=0;i--){
+            // Makes the space on the "0000 0000" representation
             if (i==3){
-                result.append(" ");
+                result += (" ");
             }
-            if (bits[i]){
-                result.append("1");
+            if (getBit(i)){
+                result += ("1");
             } else {
-                result.append("0");
+                result += ("0");
             }
         }
-        return result.toString();
+        return result;
     }
 }
