@@ -17,12 +17,30 @@ public class ALU {
      */
     final Register NZCV = new Register(GP_REGISTER_SIZE);
 
+    public void flags(Register in){
+        // Negative value flag
+        if (in.getBit(7)){
+            NZCV.setBit(0,true);
+        } else {
+            NZCV.setBit(0,false);
+        }
+        // Zero flag
+        if (in.getInt()==0){
+            NZCV.setBit(1,true);
+        } else {
+            NZCV.setBit(1,false);
+        }
+    }
+
     /**
      * Stores in register out the result of the bitwise inversion of register in (one’s complement).
      * Assume that both registers have the same size.
      */
     public void not(Register out, Register in) {
-        // TODO
+        for (int i=0; i<GP_REGISTER_SIZE;i++){
+            out.setBit(i,!in.getBit(i));
+            flags(out);
+        }
     }
 
     /**
@@ -30,7 +48,12 @@ public class ALU {
      * Assume that all registers have the same size.
      */
     public void and(Register out, Register in1, Register in2) {
-        // TODO
+        for (int i=0; i<GP_REGISTER_SIZE;i++){
+            if (in1.getBit(i) && in2.getBit(i)){
+                out.setBit(i,true);
+            }
+        }
+        flags(out);
     }
 
     /**
@@ -38,7 +61,12 @@ public class ALU {
      * Assume that all registers have the same size.
      */
     public void or(Register out, Register in1, Register in2) {
-        // TODO
+        for (int i=0; i<GP_REGISTER_SIZE;i++){
+            if (in1.getBit(i) || in2.getBit(i)){
+                out.setBit(i,true);
+            }
+        }
+        flags(out);
     }
 
     /**
@@ -46,7 +74,12 @@ public class ALU {
      * Assume that all registers have the same size.
      */
     public void xor(Register out, Register in1, Register in2) {
-        // TODO
+        for (int i=0; i<GP_REGISTER_SIZE;i++){
+            if (in1.getBit(i) || in2.getBit(i) && in1.getBit(i) != in2.getBit(i)){
+                out.setBit(i,true);
+            }
+        }
+        flags(out);
     }
 
     /**
@@ -54,7 +87,17 @@ public class ALU {
      * Assume that both registers have the same size.
      */
     public void lsl(Register out, Register in, int n) {
-        // TODO
+        for (int i = 0; i < n; i++) {
+            if (in.getBit(7)){
+                NZCV.setBit(3,true);
+            } else {
+                NZCV.setBit(3,false);
+            }
+            for (int ix = 0; ix < GP_REGISTER_SIZE-1; ix++) {
+                out.setBit(0,false);
+                out.setBit(ix+1, in.getBit(ix));
+            }
+        }
     }
 
     /**
@@ -77,36 +120,28 @@ public class ALU {
      * Return the value of the Negative flag
      */
     public boolean negativeFlag() {
-        // TODO
-        boolean todo = false;
-        return todo;
+        return NZCV.getBit(0);
     }
 
     /**
      * Return the value of the Zero flag
      */
     public boolean zeroFlag() {
-        // TODO
-        boolean todo = false;
-        return todo;
+        return NZCV.getBit(1);
     }
 
     /**
      * Return the value of the Carry flag
      */
     public boolean carryFlag() {
-        // TODO
-        boolean todo = false;
-        return todo;
+        return NZCV.getBit(2);
     }
 
     /**
      * Return the value of the Overflow flag
      */
     public boolean overflowFlag() {
-        // TODO
-        boolean todo = false;
-        return todo;
+        return NZCV.getBit(3);
     }
 
 }

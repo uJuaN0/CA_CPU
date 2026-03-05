@@ -47,6 +47,7 @@ public class Register {
     /**
      * Stores an integer using an N-bit two’s complement representation.
      */
+    // TODO
     public void set(int value) {
         // In case value>=0 it will only convert to binary
         if (value>=0){
