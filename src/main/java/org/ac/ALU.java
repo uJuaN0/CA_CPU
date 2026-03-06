@@ -87,17 +87,31 @@ public class ALU {
      * Assume that both registers have the same size.
      */
     public void lsl(Register out, Register in, int n) {
-        for (int i = 0; i < n; i++) {
-            if (in.getBit(7)){
-                NZCV.setBit(3,true);
-            } else {
-                NZCV.setBit(3,false);
-            }
-            for (int ix = 0; ix < GP_REGISTER_SIZE-1; ix++) {
-                out.setBit(0,false);
-                out.setBit(ix+1, in.getBit(ix));
-            }
+        boolean oldMSB = in.getBit(GP_REGISTER_SIZE - 1);
+
+        for (int i = 0; i < GP_REGISTER_SIZE; i++) {
+            out.setBit(i, in.getBit(i));
         }
+
+        boolean carry = false;
+
+        for (int step = 0; step < n; step++) {
+            // carry do passo atual (bit que vai sair do MSB)
+            carry = out.getBit(GP_REGISTER_SIZE - 1);
+
+            // shift left de 1
+            for (int i = GP_REGISTER_SIZE - 1; i > 0; i--) {
+                out.setBit(i, out.getBit(i - 1));
+            }
+            out.setBit(0, false);
+        }
+
+        // flags
+        NZCV.setBit(2, carry); // Carry do último shift
+        boolean overflow = oldMSB ^ out.getBit(GP_REGISTER_SIZE - 1);
+        NZCV.setBit(3, overflow);
+
+        flags(out); // N e Z do resultado final
     }
 
     /**
@@ -113,7 +127,19 @@ public class ALU {
      * Assume that all registers have the same size.
      */
     public void add(Register out, Register in1, Register in2) {
-        // TODO
+        boolean carry = false;
+        for (int i = 0; i<GP_REGISTER_SIZE;i++){
+            if (in1.getBit(i) != (in2.getBit(i) && !carry)){
+                out.setBit(i,true);
+                carry = false;
+            } else if (in1.getBit(i) == in2.getBit(i) && in1.getBit(i)){
+                carry = true;
+                out.setBit(i,false);
+            } else {
+                carry = false;
+                out.setBit(i,false);
+            }
+        }
     }
 
     /**
