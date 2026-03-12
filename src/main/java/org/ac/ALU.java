@@ -75,9 +75,7 @@ public class ALU {
      */
     public void xor(Register out, Register in1, Register in2) {
         for (int i=0; i<GP_REGISTER_SIZE;i++){
-            if (in1.getBit(i) || in2.getBit(i) && in1.getBit(i) != in2.getBit(i)){
-                out.setBit(i,true);
-            }
+                out.setBit(i,in1.getBit(i) ^ in2.getBit(i));
         }
         flags(out);
     }
@@ -128,18 +126,20 @@ public class ALU {
      */
     public void add(Register out, Register in1, Register in2) {
         boolean carry = false;
+        boolean newCarry = false;
         for (int i = 0; i<GP_REGISTER_SIZE;i++){
-            if (in1.getBit(i) != (in2.getBit(i) && !carry)){
-                out.setBit(i,true);
-                carry = false;
-            } else if (in1.getBit(i) == in2.getBit(i) && in1.getBit(i)){
-                carry = true;
-                out.setBit(i,false);
+            carry = newCarry;
+            if (!carry){
+                out.setBit(i, in1.getBit(i) ^ in2.getBit(i));
+                newCarry = in1.getBit(i) && in2.getBit(i);
             } else {
-                carry = false;
-                out.setBit(i,false);
+                out.setBit(i, (in1.getBit(i))^ in2.getBit(i) ^ carry);
+                newCarry = (in1.getBit(i) && in2.getBit(i)) || (in1.getBit(i) && carry || in2.getBit(i) && carry);
             }
         }
+        NZCV.setBit(3, newCarry != carry);
+        NZCV.setBit(2,newCarry);
+        flags(out);
     }
 
     /**
